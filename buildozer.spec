@@ -14,7 +14,7 @@ source.include_exts = py,png,jpg,kv,json,txt
 requirements = python3,kivy
 
 # --- UI ---
-orientation = landscape
+orientation = all
 fullscreen = 0
 
 # --- ANDROID SDK ---
