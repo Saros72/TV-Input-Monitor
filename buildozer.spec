@@ -34,6 +34,7 @@ icon.filename = %(source.dir)s/res/icon.png
 # --- SPLASH ---
 
 presplash.filename = %(source.dir)s/res/presplash.png
+android.presplash_color = #FFFFFF
 
 # --- RESOURCES ---
 android.add_resources = %(source.dir)s/res
