@@ -11,7 +11,7 @@ source.dir = .
 source.include_exts = py,png,jpg,kv,json,txt
 
 # --- MINIMUM REQUIREMENTS ---
-requirements = python3,kivy
+requirements = python3,kivy,pyjnius
 
 # --- UI ---
 orientation = landscape
@@ -23,6 +23,7 @@ android.minapi = 21
 android.target = 31
 
 # --- PERMISSIONS ---
+android.permissions = INTERNET
 
 # --- ARCH ---
 #android.archs = arm64-v8a,armeabi-v7a
