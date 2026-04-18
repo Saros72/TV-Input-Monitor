@@ -15,7 +15,7 @@ requirements = python3,kivy
 
 # --- UI ---
 orientation = landscape
-fullscreen = 0
+fullscreen = 1
 
 # --- ANDROID SDK ---
 android.api = 31
@@ -31,11 +31,11 @@ android.permissions =
 android.archs = armeabi-v7a
 
 presplash.filename = %(source.dir)s/banner.png
-icon.filename = %(source.dir)s/icon.png
+icon.filename = %(source.dir)s/icontv.png
 android.presplash_color = #FFFFFF
 #android.add_resources = assets/
 
-# --- BOOTSTRAP ---
+# --- HOOK/BOOTSTRAP ---
 p4a.hook = p4a/hook.py
 p4a.bootstrap = sdl2
 
