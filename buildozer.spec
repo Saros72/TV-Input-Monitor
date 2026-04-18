@@ -23,8 +23,6 @@ android.minapi = 21
 android.target = 31
 
 # --- PERMISSIONS ---
-# žádné nejsou potřeba
-android.permissions =
 
 # --- ARCH ---
 #android.archs = arm64-v8a,armeabi-v7a
