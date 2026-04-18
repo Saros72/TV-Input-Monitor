@@ -1,41 +1,29 @@
 import os
-import shutil
 from pathlib import Path
 from pythonforandroid.toolchain import ToolchainCL
 
 def after_apk_build(toolchain: ToolchainCL):
-    
-    ############################################################################
-    ## Change assets/_load.html
-    ############################################################################
-    asset_html_file = Path(toolchain._dist.dist_dir) /"src"/ "main" / "assets" / "_load.html"
-    asset_html_file.write_text("<html><head><style>body {background:black;color:white;}</style></head><body>pre-loading...</body></html>", encoding="utf-8")
-
-    ############################################################################
-    ## Change AndroidManifest.xml
-    ############################################################################
     manifest_file = Path(toolchain._dist.dist_dir) / "src" / "main" / "AndroidManifest.xml"
     
-    #-----------------------------------------------------------------------
+    if not manifest_file.exists():
+        return
+
     content = manifest_file.read_text(encoding="utf-8")
 
-    content=content.replace(
-        """<category android:name="android.intent.category.LAUNCHER" />""",
-        """<category android:name="android.intent.category.LAUNCHER" /><category android:name="android.intent.category.LEANBACK_LAUNCHER" />""",
-    )
+    # 1. Přidání LEANBACK_LAUNCHER (pro zobrazení v TV menu)
+    if 'android.intent.category.LEANBACK_LAUNCHER' not in content:
+        content = content.replace(
+            '<category android:name="android.intent.category.LAUNCHER" />',
+            '<category android:name="android.intent.category.LAUNCHER" />\n                <category android:name="android.intent.category.LEANBACK_LAUNCHER" />'
+        )
         
-    content = content.replace(
-        '<activity ',
-        '<activity android:banner="@drawable/presplash" android:icon="@mipmap/icon" android:logo="@mipmap/icon" ',
-    )
+    # 2. Nastavení VLASTNÍHO BANNERU
+    # Místo @drawable/presplash teď ukážeme na tvůj @drawable/banner
+    if 'android:banner' not in content:
+        content = content.replace(
+            '<activity ',
+            '<activity android:banner="@drawable/banner" '
+        )
     
-    #~ assert 'android:usesCleartextTraffic="true"' in content
-    assert 'android:banner="@drawable/presplash"' in content
-    assert 'android.intent.category.LEANBACK_LAUNCHER' in content
-    
-    #-----------------------------------------------------------------------
     manifest_file.write_text(content, encoding="utf-8")
-    
-    print("============================================== MANIFEST")
-    print(content)
-    print("==============================================")
+    print("============================================== HOOK: Banner nastaven na @drawable/banner")
