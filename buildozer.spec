@@ -30,7 +30,7 @@ android.permissions =
 #android.archs = arm64-v8a,armeabi-v7a
 android.archs = armeabi-v7a
 
-presplash.filename = %(source.dir)s/banner.png
+presplash.filename = %(source.dir)s/presplash.png
 icon.filename = %(source.dir)s/icontv.png
 android.presplash_color = #FFFFFF
 #android.add_resources = assets/
