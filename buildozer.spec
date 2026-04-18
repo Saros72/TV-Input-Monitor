@@ -30,10 +30,16 @@ android.permissions =
 #android.archs = arm64-v8a,armeabi-v7a
 android.archs = armeabi-v7a
 
-presplash.filename = %(source.dir)s/presplash.png
-icon.filename = %(source.dir)s/icontv.png
-android.presplash_color = #FFFFFF
-#android.add_resources = assets/
+# --- ICON ---
+icon.filename = %(source.dir)s/res/icon.png
+
+# --- SPLASH ---
+
+presplash.filename = %(source.dir)s/res/drawable/presplash.png
+
+# --- RESOURCES ---
+android.add_resources = %(source.dir)s/res
+
 
 # --- HOOK/BOOTSTRAP ---
 p4a.hook = p4a/hook.py
