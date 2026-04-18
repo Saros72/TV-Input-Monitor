@@ -1,97 +1,90 @@
-import os
-from kivy.app import App
-from kivy.core.window import Window
-from kivy.uix.label import Label
+# -*- coding: utf-8 -*-
+
+from htag import Tag,expose
+
+def start_intent( url ):
+    print(f"Try to start_intent {url}")
+    try:
+        ###################################################################
+        # https://github.com/adywizard/car-locator/blob/master/main.py#L1088
+        from jnius import autoclass
+        PythonActivity = autoclass('org.kivy.android.PythonActivity')
+        Intent = autoclass('android.content.Intent')
+        Uri = autoclass('android.net.Uri')
+        mActivity = PythonActivity.mActivity
+
+        uri = Uri.parse(url)
+        intent = Intent(Intent.ACTION_VIEW, uri)
+        intent.setDataAndType(uri, "video/*");  # ???
+        intent.setPackage("org.videolan.vlc")
+        mActivity.startActivity(intent)
+        return "ok"
+        ###################################################################
+    except Exception as e:
+        return f"ko: {e}"
 
 
-class InputMonitorApp(App):
-    def build(self):
-        # Hlavní text na obrazovce TV
-        self.label = Label(
-            text="MONITOR ZAPNUT\nMačkej tlačítka na ovladači...",
-            font_size='25sp',
-            halign='center',
-            markup=True
-        )
-
-        # 📌 VŠECHNY INPUT VRSTVY
-        Window.bind(on_key_down=self._on_key_down)
-        Window.bind(on_key_up=self._on_key_up)
-
-        Window.bind(on_joy_button_down=self._on_joy_button_down)
-        Window.bind(on_joy_hat=self._on_joy_hat)
-        Window.bind(on_joy_axis=self._on_joy_axis)
-
-        return self.label
-
-    # -----------------------
-    # KEYBOARD / TV REMOTE
-    # -----------------------
-    def _on_key_down(self, window, key, scancode, codepoint, modifiers):
-        info = (
-            f"TYP: [color=00ff00]KEY DOWN[/color]\n"
-            f"KEY: [b]{key}[/b]\n"
-            f"SCANCODE: {scancode}"
-        )
-
-        print(f"DEBUG KEY DOWN: {key} / {scancode}")
-        self.label.text = info
-        return True
-
-    def _on_key_up(self, window, key, scancode):
-        info = (
-            f"TYP: [color=00aa00]KEY UP[/color]\n"
-            f"KEY: [b]{key}[/b]\n"
-            f"SCANCODE: {scancode}"
-        )
-
-        print(f"DEBUG KEY UP: {key} / {scancode}")
-        self.label.text = info
-        return True
-
-    # -----------------------
-    # JOYSTICK BUTTONS
-    # -----------------------
-    def _on_joy_button_down(self, window, stick_id, button_id):
-        info = (
-            f"TYP: [color=00ffff]JOY BUTTON[/color]\n"
-            f"ID: [b]{button_id}[/b]\n"
-            f"STICK: {stick_id}"
-        )
-
-        print(f"DEBUG JOY BUTTON: {button_id} / stick {stick_id}")
-        self.label.text = info
-        return True
-
-    # -----------------------
-    # JOY HAT (DPAD)
-    # -----------------------
-    def _on_joy_hat(self, window, stick_id, hat_id, value):
-        info = (
-            f"TYP: [color=ffff00]JOY HAT[/color]\n"
-            f"HAT ID: {hat_id}\n"
-            f"VALUE: {value}"
-        )
-
-        print(f"DEBUG JOY HAT: {hat_id} / {value}")
-        self.label.text = info
-        return True
-
-    # -----------------------
-    # JOY AXIS (důležité pro Xiaomi / některé TV)
-    # -----------------------
-    def _on_joy_axis(self, window, stick_id, axis_id, value):
-        info = (
-            f"TYP: [color=ff8800]JOY AXIS[/color]\n"
-            f"AXIS: {axis_id}\n"
-            f"VALUE: {value:.2f}"
-        )
-
-        print(f"DEBUG JOY AXIS: axis {axis_id} / value {value}")
-        self.label.text = info
-        return True
+class FocusablePanel(Tag.div):
+    """ propose une navigation via keys cursor dans les childs @class=".focusable" """
+    statics="""
+.focusable:focus {
+  color: red;
+  outline: none;
+}
+"""
+    def init(self):
+        self.js = """
+document.onkeydown = function(e) {
+    var ll = [...document.querySelectorAll(".focusable")];
+    var current=document.activeElement;
+    if(e['key']=="ArrowLeft" || e['key']=="ArrowUp") {
+        let idx=ll.indexOf(current);
+        idx=( ll.length + idx - 1) % ll.length;
+        ll[idx].focus();
+        e.preventDefault();
+    }
+    else if(e['key']=="ArrowRight" || e['key']=="ArrowDown") {
+        let idx=ll.indexOf(current);
+        idx=( ll.length + idx + 1) % ll.length;
+        ll[idx].focus();
+        e.preventDefault();
+    }
+}
+        """
 
 
-if __name__ == '__main__':
-    print("--- STARTUJI MONITOROVÁNÍ INPUTU ---")
-    InputMonitorApp().run()
+
+class App(Tag.body):
+    imports=[FocusablePanel]
+    statics="""body {background:black;color:white}"""
+
+    def init(self):
+
+        self.log = Tag.div()
+
+        with FocusablePanel() as d:
+            d += Tag.button("play1",_class="focusable", _onclick=self.play,js="self.focus()",
+                url="https://avtshare01.rz.tu-ilmenau.de/avt-vqdb-uhd-1/test_1/segments/bigbuck_bunny_8bit_15000kbps_1080p_60.0fps_h264.mp4"
+            )
+            d += Tag.button("play2",_class="focusable", _onclick=self.play, 
+                url="https://avtshare01.rz.tu-ilmenau.de/avt-vqdb-uhd-1/test_1/segments/water_netflix_7500kbps_2160p_59.94fps_h264.mp4"
+            )
+            d += Tag.button("play3",_class="focusable", _onclick=self.play, 
+                url="https://avtshare01.rz.tu-ilmenau.de/avt-vqdb-uhd-1/test_1/segments/vegetables_tuil_15000kbps_1080p_59.94fps_h264.mp4"
+            )
+        
+        # build ui
+        self+=d
+        self+=self.log
+        
+    def play(self,o):
+        self.log.set( start_intent(o.url) )
+
+
+
+#=================================================================================
+if __name__=="__main__":
+    PORT = 12459    #!!! IMPORTANT !!! same as in buildozer.spec (see key "p4a.port") 
+
+    from htag.runners import Runner
+    Runner( App, port=PORT ).run()

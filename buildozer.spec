@@ -1,43 +1,48 @@
+
 [app]
 
-title = TV Input Monitor
-package.name = tvinputmonitor
-package.domain = org.saros
+title = Mobie Box
+package.name = moviebox
+package.domain = org.test
+version = 1.0
 
-version = 0.1.0
-
-# --- SOURCE ---
 source.dir = .
-source.include_exts = py,png,jpg,kv,json,txt
+source.include_exts = py,png,jpg
 
-# --- MINIMUM REQUIREMENTS ---
-requirements = python3,kivy
 
-# --- UI ---
-orientation = all
-fullscreen = 0
+#--------------------------------------------------------- https://github.com/ArtemSBulgakov/buildozer-action/issues/34
+requirements = android,htag<=1.0.0
+#---------------------------------------------------------
 
-# --- ANDROID SDK ---
-android.api = 31
-android.minapi = 21
-android.target = 31
+#=================================== # smartphone
+# orientation = portrait
+# fullscreen = 0
+#~ ## android.archs = arm64-v8a
+# android.archs = x86_64
+# icon.filename = %(source.dir)s/icone.png
+#=================================== # android tv
+orientation = landscape
+fullscreen = 1
+android.archs = armeabi-v7a
+presplash.filename = %(source.dir)s/banner.png
+icon.filename = %(source.dir)s/icontv.png
+#===================================
 
-# --- PERMISSIONS ---
-# žádné nejsou potřeba
-android.permissions =
 
-# --- ARCH ---
-android.archs = arm64-v8a,armeabi-v7a
+home_app = 1
+android.permissions = INTERNET,READ_EXTERNAL_STORAGE,MANAGE_EXTERNAL_STORAGE,WRITE_EXTERNAL_STORAGE,READ_MEDIA_AUDIO,MEDIA_CONTENT_CONTROL
+android.accept_sdk_license = True
 
-icon.filename = assets/icon.png
-presplash.filename = assets/presplash.png
-android.presplash_color = #000000
-#android.add_resources = assets/
+# (str) Filename to the hook for p4a
+p4a.hook = p4a/hook.py
 
-# --- BOOTSTRAP ---
-p4a.bootstrap = sdl2
+# this PORT should be the same as in Runner part !!!!
+p4a.port = 12459
+p4a.bootstrap = webview
+#--------------------------------------------------------- by default it's "master"
+p4a.branch = v2023.09.16
+#~ p4a.branch = v2024.01.21
+#---------------------------------------------------------
 
-# --- DEBUG ---
+[buildozer]
 log_level = 2
-
-android.allow_backup = False
