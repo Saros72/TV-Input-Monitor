@@ -33,7 +33,7 @@ icon.filename = %(source.dir)s/res/icon.png
 
 # --- SPLASH ---
 
-presplash.filename = %(source.dir)s/res/drawable/presplash.png
+presplash.filename = %(source.dir)s/res/presplash.png
 
 # --- RESOURCES ---
 android.add_resources = %(source.dir)s/res
