@@ -11,23 +11,23 @@ source.dir = .
 source.include_exts = py,png,jpg,kv,json,txt
 
 # --- MINIMUM REQUIREMENTS ---
-requirements = python3,pyjnius,pygame
+requirements = python3,pygame
 
 # --- UI ---
 orientation = landscape
 fullscreen = 1
 
 # --- ANDROID SDK ---
-android.api = 31
+android.api = 33
 android.minapi = 21
-android.target = 31
+android.target = 33
 
 # --- PERMISSIONS ---
 android.permissions = INTERNET
 
 # --- ARCH ---
 #android.archs = arm64-v8a,armeabi-v7a
-android.archs = armeabi-v7a
+android.archs = arm64-v8a,armeabi-v7a
 
 # --- ICON ---
 icon.filename = %(source.dir)s/res/icon.png
@@ -43,7 +43,7 @@ android.add_resources = %(source.dir)s/res
 
 # --- HOOK/BOOTSTRAP ---
 p4a.hook = p4a/hook.py
-p4a.bootstrap = sdl2
+#p4a.bootstrap = sdl2
 
 # --- DEBUG ---
 log_level = 2
