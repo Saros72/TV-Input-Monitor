@@ -11,7 +11,7 @@ source.dir = .
 source.include_exts = py,png,jpg,kv,json,txt
 
 # --- MINIMUM REQUIREMENTS ---
-requirements = python3,kivy,pyjnius
+requirements = python3,pyjnius,pygame
 
 # --- UI ---
 orientation = landscape

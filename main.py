@@ -1,157 +1,88 @@
-import os
-import time
-from kivy.app import App
-from kivy.core.window import Window
-from kivy.uix.label import Label
+import pygame
+import sys
 
-from jnius import autoclass
-from android.runnable import run_on_ui_thread
+pygame.init()
+pygame.key.stop_text_input()
 
-# 🔥 ANDROID TOAST
-Toast = autoclass('android.widget.Toast')
-PythonActivity = autoclass('org.kivy.android.PythonActivity')
-String = autoclass('java.lang.String')
+# --- BARVY ---
+BG = (18, 18, 18)
+GREEN = (46, 204, 113)
+RED = (231, 76, 60)
+WHITE = (255, 255, 255)
+GRAY = (160, 160, 160)
 
+# --- OKNO (LANDSCAPE) ---
+info = pygame.display.Info()
+sw, sh = info.current_w, info.current_h
 
-@run_on_ui_thread
-def android_toast(text):
-    context = PythonActivity.mActivity
-    jtext = String(text)
-    Toast.makeText(context, jtext, Toast.LENGTH_SHORT).show()
+if sh > sw:
+    sw, sh = sh, sw
 
+screen = pygame.display.set_mode((sw, sh))
 
-class InputMonitorApp(App):
-    def build(self):
+# --- FONTY (větší URL, menší button) ---
+font_title = pygame.font.SysFont("sans-serif", int(sh * 0.08), bold=True)
+font_url = pygame.font.SysFont("monospace", int(sh * 0.06), bold=True)
+font_btn = pygame.font.SysFont("sans-serif", int(sh * 0.035), bold=True)
 
-        self.label = Label(
-            text="MONITOR ACTIVE\nPress remote buttons...",
-            font_size='25sp',
-            halign='center',
-            markup=True
+clock = pygame.time.Clock()
+
+running = True
+server_running = False
+
+SERVER_URL = "http://127.0.0.1:9777"
+
+while running:
+    screen.fill(BG)
+
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            running = False
+
+        if event.type == pygame.KEYDOWN:
+            if event.key in [pygame.K_RETURN, pygame.K_SPACE]:
+                server_running = not server_running
+
+    # ===== TITULEK =====
+    title_text = "SERVER RUNNING" if server_running else "SERVER STOPPED"
+    title_color = GREEN if server_running else RED
+
+    title = font_title.render(title_text, True, title_color)
+    screen.blit(title, (sw//2 - title.get_width()//2, int(sh * 0.15)))
+
+    # ===== URL (větší a výraznější) =====
+    url_color = WHITE if server_running else GRAY
+    url_text = font_url.render(SERVER_URL, True, url_color)
+
+    screen.blit(url_text, (sw//2 - url_text.get_width()//2, int(sh * 0.38)))
+
+    # ===== MALÉ TLAČÍTKO =====
+    bw, bh = int(sw * 0.22), int(sh * 0.10)   # menší než předtím
+
+    rect = pygame.Rect(
+        sw // 2 - bw // 2,
+        int(sh * 0.70),
+        bw,
+        bh
+    )
+
+    btn_color = GREEN if not server_running else RED
+    label = "START" if not server_running else "STOP"
+
+    pygame.draw.rect(screen, btn_color, rect, border_radius=18)
+    pygame.draw.rect(screen, GRAY, rect, width=2, border_radius=18)
+
+    txt = font_btn.render(label, True, WHITE)
+    screen.blit(
+        txt,
+        (
+            rect.centerx - txt.get_width() // 2,
+            rect.centery - txt.get_height() // 2
         )
+    )
 
-        self.last_back = 0
+    pygame.display.flip()
+    clock.tick(30)
 
-        # INPUT BINDING
-        Window.bind(on_key_down=self._on_key_down)
-        Window.bind(on_key_up=self._on_key_up)
-
-        Window.bind(on_joy_button_down=self._on_joy_button_down)
-        Window.bind(on_joy_hat=self._on_joy_hat)
-        Window.bind(on_joy_axis=self._on_joy_axis)
-
-        return self.label
-
-    # -----------------------
-    # KEY DOWN
-    # -----------------------
-    def _on_key_down(self, window, key, scancode, codepoint, modifiers):
-
-        info = (
-            f"TYPE: [color=00ff00]KEY DOWN[/color]\n"
-            f"KEY: [b]{key}[/b]\n"
-            f"SCANCODE: {scancode}"
-        )
-
-        print(f"DEBUG KEY DOWN: {key} / {scancode}")
-        self.label.text = info
-
-        # BACK nepouštíme systému
-        if key in (27, 4, 1001):
-            return True
-
-        return False
-
-    # -----------------------
-    # KEY UP
-    # -----------------------
-    def _on_key_up(self, window, key, scancode):
-
-        print(f"DEBUG KEY UP: {key} / {scancode}")
-
-        # 🔙 BACK (mobile + Android TV)
-        if key in (27, 1001):
-
-            now = time.time()
-
-            if now - self.last_back < 2:
-                App.get_running_app().stop()
-            else:
-                self.last_back = now
-                android_toast("Tap again to close the app")
-
-            return True
-
-        info = (
-            f"TYPE: [color=00aa00]KEY UP[/color]\n"
-            f"KEY: [b]{key}[/b]\n"
-            f"SCANCODE: {scancode}"
-        )
-
-        self.label.text = info
-        return True
-
-    # -----------------------
-    # JOY BUTTON
-    # -----------------------
-    def _on_joy_button_down(self, window, stick_id, button_id):
-
-        print(f"DEBUG JOY BUTTON: {button_id}")
-
-        # 🔙 BACK (TV / gamepad)
-        if button_id == 4:
-            now = time.time()
-
-            if now - self.last_back < 2:
-                App.get_running_app().stop()
-            else:
-                self.last_back = now
-                android_toast("Tap again to close the app")
-
-            return True
-
-        info = (
-            f"TYPE: [color=00ffff]JOY BUTTON[/color]\n"
-            f"ID: [b]{button_id}[/b]\n"
-            f"STICK: {stick_id}"
-        )
-
-        self.label.text = info
-        return True
-
-    # -----------------------
-    # JOY HAT (DPAD)
-    # -----------------------
-    def _on_joy_hat(self, window, stick_id, hat_id, value):
-
-        print(f"DEBUG JOY HAT: {value}")
-
-        info = (
-            f"TYPE: [color=ffff00]JOY HAT[/color]\n"
-            f"HAT ID: {hat_id}\n"
-            f"VALUE: {value}"
-        )
-
-        self.label.text = info
-        return True
-
-    # -----------------------
-    # JOY AXIS
-    # -----------------------
-    def _on_joy_axis(self, window, stick_id, axis_id, value):
-
-        print(f"DEBUG JOY AXIS: {axis_id} / {value}")
-
-        info = (
-            f"TYPE: [color=ff8800]JOY AXIS[/color]\n"
-            f"AXIS: {axis_id}\n"
-            f"VALUE: {value:.2f}"
-        )
-
-        self.label.text = info
-        return True
-
-
-if __name__ == '__main__':
-    print("--- STARTING INPUT MONITOR ---")
-    InputMonitorApp().run()
+pygame.quit()
+sys.exit()
